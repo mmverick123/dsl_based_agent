@@ -11,6 +11,19 @@
   - `examples/broken_example.dsl` 用于验证语法错误提示。
   - 其余示例（如 `refund_bot.dsl`, `faq_bot.dsl`, `omni_support.dsl`）可手动跑通或作为集成测试脚本输入。
 
+## 2. 现有测试用例详解
+- `tests/test_parser.py`
+  - **成功场景**：解析一个包含 `entry` 与 `on_intent` 的最小脚本，断言 bot/state/intent 正确写入 AST。
+  - **错误场景**：故意缺冒号的 state 行，期望抛出 `DSLParseError`，并断言错误信息包含具体行号。
+- `tests/test_executor.py`
+  - **goto/end 流程**：准备两次 Stub LLM 返回（先 `go` 后 `done`），断言首次输入触发 `goto second` 且执行目标 `entry`，第二次输入触发 `end` 并关闭会话。
+  - **条件分支与 fallback**：当 `slots.amount` 存在时命中条件分支并结束；当槽位缺失时走 fallback，保持会话未结束。
+- `tests/test_cli.py`
+  - **命令行桩**：用 `monkeypatch` 重写 `sys.argv` 和 `input`，模拟 `--mock-llm` 模式下的两轮对话，检查启动欢迎语与意图命中回复（或 fallback）是否出现在输出中。
+- `示例脚本`
+  - `examples/broken_example.dsl`：`state` 无冒号，运行时应抛出带行号的 `DSLParseError`。
+  - 其他示例脚本可作为手工或集成测试输入，检验实际对话流程和动作效果。
+
 ## 2. 依赖安装
 ```bash
 pip install -r requirements.txt
