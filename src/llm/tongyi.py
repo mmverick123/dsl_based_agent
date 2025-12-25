@@ -16,7 +16,7 @@ except ImportError:  # pragma: no cover - optional dependency
 SYSTEM_PROMPT = """
 你是企业智能客服系统的意图解析器，需要根据用户话术推断意图与槽位。
 请仅输出 JSON，格式如下：
-{"intent": "<intent_id>", "confidence": 0-1, "slots": {"slot": "value"}}
+{{"intent": "<intent_id>", "confidence": 0-1, "slots": {{"slot": "value"}}}}
 候选意图: {candidate_intents}
 如果难以确定，intent 返回 "unknown"，confidence 设为 0.0。
 """.strip()
