@@ -55,6 +55,10 @@ def _reply_handler(action: ActionNode, context: RuntimeContext) -> ActionResult:
 
 
 def _set_handler(action: ActionNode, context: RuntimeContext) -> ActionResult | None:
+    key = None
+    value = None
+
+    # 位置参数形式：set foo bar
     if action.positional_args:
         key = action.positional_args[0]
         if len(action.positional_args) >= 2:
@@ -62,8 +66,16 @@ def _set_handler(action: ActionNode, context: RuntimeContext) -> ActionResult | 
         else:
             value = action.named_args.get("value")
     else:
-        key = action.named_args.get("key")
-        value = action.named_args.get("value")
+        # 命名参数形式：
+        # 1) set key=value
+        # 2) set key = value
+        # 3) set foo=bar   （取第一个键值对为 key/value）
+        if "key" in action.named_args:
+            key = action.named_args.get("key")
+            value = action.named_args.get("value")
+        elif action.named_args:
+            key, value = next(iter(action.named_args.items()))
+
     if key is None:
         raise ValueError("set 动作缺少变量名")
     context.set_var(key, value)
