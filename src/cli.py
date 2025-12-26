@@ -8,7 +8,6 @@ from typing import List
 from src.dsl.parser import Parser
 from src.llm.base import LLMError
 from src.llm.mock import MockLLMClient
-from src.llm.tongyi import TongyiLLMClient
 from src.runtime.actions import ActionResult, build_default_registry
 from src.runtime.context import RuntimeContext
 from src.runtime.executor import Executor
@@ -17,6 +16,9 @@ from src.runtime.executor import Executor
 def build_llm(args):
     if args.mock_llm:
         return MockLLMClient()
+    # 延迟导入，避免在仅使用 mock 时强依赖 dashscope
+    from src.llm.tongyi import TongyiLLMClient
+
     api_key = args.api_key or os.getenv("DASHSCOPE_API_KEY")
     if not api_key:
         raise ValueError("未提供 dashscope API Key，可使用 --mock-llm 进行本地调试。")
